@@ -1,0 +1,27 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-central1-docker.pkg.dev/csci5409-kubernetes-1/container2/container_2_image:$COMMIT_SHA",
+        ".",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "us-central1-docker.pkg.dev/csci5409-kubernetes-1/container2/container_2_image:$COMMIT_SHA",
+      ]
+  - name: "gcr.io/cloud-builders/gke-deploy"
+    id: Deployment
+    args:
+      [
+        "run",
+        "--filename=container2-deployment.yaml",
+        "--image=us-central1-docker.pkg.dev/csci5409-kubernetes-1/container2/container_2_image:$COMMIT_SHA",
+        "--location=us-central1-c",
+        "--cluster=csci5409-k8s-cluster",
+      ]
+images:
+  - "us-central1-docker.pkg.dev/csci5409-kubernetes-1/container2/container_2_image:$COMMIT_SHA"

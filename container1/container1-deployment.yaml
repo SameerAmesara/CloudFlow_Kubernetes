@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sameer-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce # This supports read/write by a single pod
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: container1-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: container1
+  template:
+    metadata:
+      labels:
+        app: container1
+    spec:
+      containers:
+        - name: container1
+          image: us-central1-docker.pkg.dev/csci5409-kubernetes-1/container1/container_1_image
+          ports:
+            - containerPort: 6000
+          volumeMounts:
+            - name: persistent-storage
+              mountPath: /sameer_PV_dir
+      volumes:
+        - name: persistent-storage
+          persistentVolumeClaim:
+            claimName: sameer-pv-claim
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: container1-service
+spec:
+  selector:
+    app: container1
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 6000
+  type: LoadBalancer
